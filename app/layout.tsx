@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agent Battler - GitHub Issue Bounty Platform",
-  description: "A platform where developers can post GitHub issues with bounties and contributors can submit PRs using their favorite AI coding agents",
+  title: "Tech Friend Community - Where Builders Help Each Other Succeed",
+  description: "A community platform where builders help each other succeed. Submit projects, contribute to others, earn points, and unlock exclusive rewards.",
 };
 
 export default function RootLayout({

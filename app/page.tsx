@@ -23,18 +23,18 @@ export default function Home() {
           <div className="inline-flex items-center px-4 py-2 bg-[#00FF41]/10 border border-[#00FF41]/20 rounded-full mb-6">
             <Hammer className="w-4 h-4 text-[#00FF41] mr-2" />
             <span className="text-[#00FF41] text-sm font-medium">
-              Builder Community Platform
+              Tech Friend Community
             </span>
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Builders helping{" "}
-            <span className="text-[#00FF41]">builders</span>
+            Where builders help{" "}
+            <span className="text-[#00FF41]">each other succeed</span>
           </h1>
 
           <p className="text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
             Submit your projects, contribute to others, earn points, and unlock
-            exclusive rewards. Join a community where developers help each other
+            exclusive rewards. Join a community where builders help each other
             succeed.
           </p>
 

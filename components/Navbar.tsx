@@ -23,7 +23,7 @@ export function Navbar() {
             <Link href="/" className="flex items-center">
               <Hammer className="h-8 w-8 text-[#00FF41]" />
               <span className="ml-2 text-xl font-bold text-white">
-                Builders
+                Tech Friend Community
               </span>
             </Link>
 
