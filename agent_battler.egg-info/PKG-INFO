@@ -1,0 +1,225 @@
+Metadata-Version: 2.4
+Name: agent-battler
+Version: 0.1.0
+Summary: CLI wrapper for capturing network requests from AI coding agents using mitmproxy
+Author: Agent Battler Contributors
+License: MIT
+Project-URL: Homepage, https://github.com/aj47/agent-battler
+Project-URL: Repository, https://github.com/aj47/agent-battler
+Project-URL: Issues, https://github.com/aj47/agent-battler/issues
+Keywords: ai,coding-agents,mitmproxy,network-capture,cli
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Tools
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: mitmproxy>=10.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+
+# Agent Battler CLI Wrapper
+
+A command-line wrapper that captures network requests made by AI coding agents using embedded mitmproxy, providing an alternative to asciicinema for recording agent sessions.
+
+## Overview
+
+Instead of recording terminal sessions with asciicinema, this CLI wrapper captures the actual network requests made by AI coding agents. This provides:
+
+- 📡 **Network-level transparency** - See exactly what API calls the agent makes
+- 🔍 **Better debugging** - Analyze request/response data for troubleshooting
+- 📊 **Detailed metrics** - Track API usage, response times, and data transfer
+- 🎯 **Focused data** - Capture only the relevant network activity, not terminal noise
+- 🐍 **Pure Python** - No additional installations required, mitmproxy is embedded
+
+## Installation
+
+### Prerequisites
+
+**Python 3.8+** - That's it! mitmproxy is included as a dependency.
+
+### Install from source
+
+```bash
+# Clone the repository (if not already done)
+cd /path/to/agent-battler
+
+# Install the package with pip
+pip install -e .
+
+# Or install with all dependencies
+pip install -r requirements.txt
+pip install -e .
+```
+
+The `-e` flag installs in "editable" mode, so changes to the code are immediately available.
+
+### Install globally
+
+```bash
+# Install the package
+pip install .
+
+# Or from PyPI (when published)
+pip install agent-battler
+```
+
+That's it! The `agent-battler` command will be available globally.
+
+## Usage
+
+### Basic Command
+
+```bash
+agent-battler <agent> <instruction>
+```
+
+### Examples
+
+```bash
+# Using Claude
+agent-battler claude "Fix the authentication bug in login.ts"
+
+# Using Augment
+agent-battler auggie "Add error handling to the API endpoints"
+
+# Using Cursor
+agent-battler cursor "Refactor the database queries for better performance"
+
+# Using GitHub Copilot
+agent-battler copilot "Write unit tests for the user service"
+```
+
+### Supported Agents
+
+- `claude` - Anthropic's Claude
+- `auggie` - Augment Code
+- `cursor` - Cursor AI
+- `copilot` - GitHub Copilot
+- `codeium` - Codeium
+- `chatgpt` - ChatGPT
+
+## How It Works
+
+1. **Embeds mitmproxy** - Uses mitmproxy's Python API directly (no separate process)
+2. **Starts proxy server** - Launches on port 8080 (configurable)
+3. **Configures environment** - Sets HTTP_PROXY and HTTPS_PROXY environment variables
+4. **Executes agent command** - Runs the AI agent with the proxy configuration
+5. **Captures requests** - Logs all HTTP/HTTPS requests and responses in real-time
+6. **Saves to file** - Stores the captured data in JSON format when done
+
+## Output
+
+Network captures are saved to `agent-battler-logs/` in your current directory:
+
+```
+agent-battler-logs/
+├── claude-2025-11-07T12-30-45.json
+├── auggie-2025-11-07T14-15-22.json
+└── cursor-2025-11-07T16-45-10.json
+```
+
+### Log File Format
+
+```json
+{
+  "metadata": {
+    "captured_at": "2025-11-07T12:30:45.123Z",
+    "total_requests": 15
+  },
+  "requests": [
+    {
+      "timestamp": "2025-11-07T12:30:46.456Z",
+      "type": "request",
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "headers": { ... },
+      "body": "..."
+    },
+    {
+      "timestamp": "2025-11-07T12:30:47.789Z",
+      "type": "response",
+      "status_code": 200,
+      "headers": { ... },
+      "body": "..."
+    }
+  ]
+}
+```
+
+## Submitting to Agent Battler
+
+When submitting your PR to Agent Battler:
+
+1. Create your PR on GitHub as usual
+2. Run your work using the CLI wrapper to capture network requests
+3. Upload the JSON log file to a hosting service (GitHub Gist, etc.)
+4. Submit the PR on Agent Battler with the log file URL
+
+This provides transparency about the agent's API usage and decision-making process.
+
+## Development Mode
+
+For development, you can run the CLI directly:
+
+```bash
+# Run the module directly
+python -m agent_battler.cli claude "test instruction"
+
+# Or if installed in editable mode
+agent-battler claude "test instruction"
+```
+
+## Troubleshooting
+
+### "No module named 'mitmproxy'"
+
+Install the dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### "command not found: agent-battler"
+
+Install the package:
+```bash
+pip install -e .
+```
+
+### SSL Certificate Errors
+
+mitmproxy uses a self-signed certificate for HTTPS interception. Some agents may reject this. The CLI sets `NODE_TLS_REJECT_UNAUTHORIZED=0` to work around this, but be aware this reduces security.
+
+### Proxy Not Working
+
+Some agents may not respect the HTTP_PROXY environment variables. In these cases, you may need to configure the agent manually to use `http://localhost:8080` as its proxy.
+
+## Future Enhancements
+
+- [ ] Agent-specific command execution (currently simulated)
+- [ ] Automatic proxy configuration for each agent
+- [ ] Real-time request visualization
+- [ ] Request filtering and analysis tools
+- [ ] Integration with Agent Battler platform for automatic upload
+- [ ] Support for custom proxy ports
+- [ ] Request replay functionality
+
+## Contributing
+
+This is an initial implementation. Contributions are welcome to:
+
+- Add actual command execution for specific agents
+- Improve proxy configuration
+- Add request analysis tools
+- Enhance the log file format
+- Create visualization tools for captured data
+

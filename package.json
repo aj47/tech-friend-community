@@ -1,0 +1,42 @@
+{
+  "name": "agent-battler",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx convex dev & next dev --turbopack",
+    "dev:next": "next dev --turbopack",
+    "dev:convex": "npx convex dev",
+    "build": "next build",
+    "build:cloudflare": "next build && open-next build --minify",
+    "start": "next start",
+    "lint": "eslint",
+    "deploy:cloudflare": "npm run build:cloudflare && wrangler pages deploy .open-next/worker --project-name agent-battler"
+  },
+  "dependencies": {
+    "@auth/core": "^0.37.4",
+    "@convex-dev/auth": "^0.0.90",
+    "@octokit/rest": "^22.0.0",
+    "convex": "^1.27.3",
+    "lucide-react": "^0.544.0",
+    "next": "15.5.4",
+    "octokit": "^5.0.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-markdown": "^10.1.0",
+    "rehype-raw": "^7.0.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.4",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wrangler": "^4.40.2"
+  }
+}

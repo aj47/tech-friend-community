@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Ensure input and textarea elements have dark, readable text in light mode */
+input[type="text"],
+input[type="url"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+  color: #030712; /* Tailwind gray-950 - darker than gray-900 for better contrast */
+}
+
+/* Ensure placeholders are visible but not too dark */
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280; /* Tailwind gray-500 */
+  opacity: 1; /* Override browser default opacity */
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  input[type="text"],
+  input[type="url"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  textarea,
+  select {
+    color: #f9fafb; /* Tailwind gray-50 for dark mode */
+  }
+
+  /* Ensure dark mode backgrounds work well */
+  input[type="text"]:not([class*="bg-"]),
+  input[type="url"]:not([class*="bg-"]),
+  input[type="email"]:not([class*="bg-"]),
+  input[type="password"]:not([class*="bg-"]),
+  input[type="number"]:not([class*="bg-"]),
+  input[type="search"]:not([class*="bg-"]),
+  textarea:not([class*="bg-"]),
+  select:not([class*="bg-"]) {
+    background-color: #1f2937; /* Tailwind gray-800 for dark mode */
+    border-color: #374151; /* Tailwind gray-700 for dark mode */
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af; /* Tailwind gray-400 for dark mode placeholders */
+  }
+}
+
+/* Improve focus states for better accessibility */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+  outline: 2px solid #3b82f6; /* Tailwind blue-500 */
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for interactive elements */
+input,
+textarea,
+select,
+button,
+a {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Improve button hover states */
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Better disabled state visibility */
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Improve link hover states */
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Better scrollbar styling for webkit browsers */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6; /* Tailwind gray-100 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db; /* Tailwind gray-300 */
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af; /* Tailwind gray-400 */
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: #1f2937; /* Tailwind gray-800 */
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #4b5563; /* Tailwind gray-600 */
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280; /* Tailwind gray-500 */
+  }
+}

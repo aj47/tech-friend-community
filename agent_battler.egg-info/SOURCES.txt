@@ -1,0 +1,13 @@
+CLI_WRAPPER_GUIDE.md
+README.md
+pyproject.toml
+agent_battler/__init__.py
+agent_battler/agents.py
+agent_battler/cli.py
+agent_battler/proxy_manager.py
+agent_battler.egg-info/PKG-INFO
+agent_battler.egg-info/SOURCES.txt
+agent_battler.egg-info/dependency_links.txt
+agent_battler.egg-info/entry_points.txt
+agent_battler.egg-info/requires.txt
+agent_battler.egg-info/top_level.txt
