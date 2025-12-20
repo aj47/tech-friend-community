@@ -22,7 +22,19 @@ export default function RewardsPage() {
     }
   };
 
-  if (!currentUser) {
+  if (currentUser === undefined) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A]">
+        <Navbar />
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+          <Loader2 className="w-10 h-10 text-[#00FF41] animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading rewards...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (currentUser === null) {
     return (
       <div className="min-h-screen bg-[#0A0A0A]">
         <Navbar />
