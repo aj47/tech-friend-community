@@ -221,3 +221,44 @@ export const fetchGitHubUser = action({
     }
   },
 });
+
+/**
+ * Fetch open issues from a repository
+ */
+export const fetchRepoIssues = action({
+  args: {
+    accessToken: v.string(),
+    owner: v.string(),
+    repo: v.string(),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const octokit = new Octokit({ auth: args.accessToken });
+
+      const { data } = await octokit.rest.issues.listForRepo({
+        owner: args.owner,
+        repo: args.repo,
+        state: "open",
+        per_page: 50,
+      });
+
+      // Filter out pull requests (they also show up in the issues endpoint)
+      const issues = data.filter((issue) => !issue.pull_request);
+
+      return issues.map((issue) => ({
+        number: issue.number,
+        title: issue.title,
+        url: issue.html_url,
+        state: issue.state,
+        labels: issue.labels
+          .map((label) => (typeof label === "string" ? label : label.name || ""))
+          .filter(Boolean),
+        body: issue.body?.slice(0, 200) || "",
+        createdAt: issue.created_at,
+      }));
+    } catch (error: any) {
+      console.error("Error fetching issues:", error);
+      throw new Error(`Failed to fetch issues: ${error.message}`);
+    }
+  },
+});

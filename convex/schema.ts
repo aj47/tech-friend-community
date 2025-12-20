@@ -56,6 +56,13 @@ const schema = defineSchema({
     description: v.string(),
     helpWanted: v.string(),
     tags: v.array(v.string()),
+    githubIssues: v.optional(v.array(v.object({
+      number: v.number(),
+      title: v.string(),
+      url: v.string(),
+      state: v.union(v.literal("open"), v.literal("closed")),
+      labels: v.array(v.string()),
+    }))),
     status: v.union(
       v.literal("active"),
       v.literal("paused"),
