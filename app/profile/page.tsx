@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Navbar } from "@/components/Navbar";
 import { PointsBadge, TierProgress } from "@/components/PointsBadge";
 import { ProjectCard } from "@/components/ProjectCard";
+import { AchievementsList } from "@/components/AchievementsList";
 import Link from "next/link";
 import {
   GitPullRequest,
@@ -144,6 +145,12 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+
+        {/* Achievements Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-white mb-4">Achievements</h2>
+          <AchievementsList showAll={true} />
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* My Projects */}

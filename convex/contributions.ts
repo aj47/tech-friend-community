@@ -1,6 +1,8 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { auth } from "./auth";
+import { updateStreak } from "./streaks";
 
 // Point values for different contribution types
 const POINT_VALUES = {
@@ -69,6 +71,9 @@ export const submitContribution = mutation({
       createdAt: Date.now(),
     });
 
+    // Update user's streak
+    await updateStreak(ctx, userId);
+
     // Notify project owner
     await ctx.db.insert("notifications", {
       userId: project.ownerId,
@@ -79,6 +84,19 @@ export const submitContribution = mutation({
       relatedContributionId: contributionId,
       isRead: false,
       createdAt: Date.now(),
+    });
+
+    // Get contributor info for activity message
+    const contributor = await ctx.db.get(userId);
+    const contributorName = contributor?.name || contributor?.githubUsername || "Someone";
+    const typeLabel = args.type === "pr_merged" ? "PR" : args.type === "issue_merged" ? "issue fix" : "feedback";
+
+    // Log activity
+    await ctx.scheduler.runAfter(0, internal.activity.logActivity, {
+      type: "contribution_submitted",
+      userId: userId,
+      relatedId: contributionId,
+      message: `${contributorName} submitted a ${typeLabel} to "${project.title}"`,
     });
 
     return contributionId;
@@ -142,6 +160,15 @@ export const verifyContribution = mutation({
       relatedContributionId: args.contributionId,
       isRead: false,
       createdAt: Date.now(),
+    });
+
+    // Log activity for verified contribution
+    const contributorName = contributor?.name || contributor?.githubUsername || "Someone";
+    await ctx.scheduler.runAfter(0, internal.activity.logActivity, {
+      type: "contribution_verified",
+      userId: contribution.contributorId,
+      relatedId: args.contributionId,
+      message: `${contributorName} earned ${contribution.pointsAwarded} points for a contribution to "${project.title}"`,
     });
 
     return args.contributionId;

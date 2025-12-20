@@ -48,7 +48,7 @@ export default function SubmitProjectPage() {
     number: number;
     title: string;
     url: string;
-    state: string;
+    state: "open" | "closed";
     labels: string[];
     body: string;
     createdAt: string;

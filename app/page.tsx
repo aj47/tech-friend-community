@@ -5,6 +5,7 @@ import { Hammer, Users, Gift, ArrowRight, Trophy, Zap, GitPullRequest } from "lu
 import { Navbar } from "@/components/Navbar";
 import { ProjectCard } from "@/components/ProjectCard";
 import { LeaderboardMini } from "@/components/LeaderboardTable";
+import { ActivityFeedMini } from "@/components/ActivityFeed";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -134,14 +135,15 @@ export default function Home() {
             )}
           </div>
 
-          {/* Sidebar - Leaderboard */}
-          <div>
+          {/* Sidebar - Leaderboard & Activity */}
+          <div className="space-y-6">
             {leaderboard && (
               <LeaderboardMini
                 users={leaderboard}
                 title="Top Contributors"
               />
             )}
+            <ActivityFeedMini limit={5} />
           </div>
         </div>
 

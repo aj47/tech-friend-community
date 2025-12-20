@@ -7,11 +7,13 @@ import { api } from "@/convex/_generated/api";
 import { Bell, Hammer, Trophy, User, LogOut, Menu, X, Gift, Bug } from "lucide-react";
 import { useState } from "react";
 import { PointsBadge } from "./PointsBadge";
+import { StreakBadge } from "./StreakBadge";
 
 export function Navbar() {
   const { signOut } = useAuthActions();
   const currentUser = useQuery(api.users.getCurrentUser);
   const unreadCount = useQuery(api.notifications.getUnreadCount);
+  const streakInfo = useQuery(api.streaks.getMyStreak);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -83,6 +85,14 @@ export function Navbar() {
                     size="sm"
                     showPoints={true}
                   />
+
+                  {streakInfo && streakInfo.currentStreak > 0 && (
+                    <StreakBadge
+                      currentStreak={streakInfo.currentStreak}
+                      longestStreak={streakInfo.longestStreak}
+                      size="sm"
+                    />
+                  )}
 
                   <Link
                     href="/profile"
