@@ -55,7 +55,7 @@ export default function EditProjectPage() {
     number: number;
     title: string;
     url: string;
-    state: string;
+    state: "open" | "closed";
     labels: string[];
     body: string;
     createdAt: string;
@@ -64,7 +64,7 @@ export default function EditProjectPage() {
     number: number;
     title: string;
     url: string;
-    state: string;
+    state: "open" | "closed";
     labels: string[];
   }>>([]);
   const [isFetchingIssues, setIsFetchingIssues] = useState(false);

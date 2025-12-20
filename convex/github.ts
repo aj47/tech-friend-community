@@ -249,7 +249,7 @@ export const fetchRepoIssues = action({
         number: issue.number,
         title: issue.title,
         url: issue.html_url,
-        state: issue.state,
+        state: issue.state as "open" | "closed",
         labels: issue.labels
           .map((label) => (typeof label === "string" ? label : label.name || ""))
           .filter(Boolean),

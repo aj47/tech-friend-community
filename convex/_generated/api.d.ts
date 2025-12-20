@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as achievements from "../achievements.js";
+import type * as activity from "../activity.js";
 import type * as auth from "../auth.js";
 import type * as contributions from "../contributions.js";
 import type * as dev from "../dev.js";
@@ -16,6 +18,7 @@ import type * as http from "../http.js";
 import type * as notifications from "../notifications.js";
 import type * as projects from "../projects.js";
 import type * as rewards from "../rewards.js";
+import type * as streaks from "../streaks.js";
 import type * as users from "../users.js";
 
 import type {
@@ -25,6 +28,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  achievements: typeof achievements;
+  activity: typeof activity;
   auth: typeof auth;
   contributions: typeof contributions;
   dev: typeof dev;
@@ -33,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   projects: typeof projects;
   rewards: typeof rewards;
+  streaks: typeof streaks;
   users: typeof users;
 }>;
 

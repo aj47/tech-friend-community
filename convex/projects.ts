@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { auth } from "./auth";
 
 /**
@@ -53,6 +54,16 @@ export const submitProject = mutation({
       status: "active",
       createdAt: Date.now(),
       updatedAt: Date.now(),
+    });
+
+    // Log activity for project creation
+    const user = await ctx.db.get(userId);
+    const userName = user?.name || user?.githubUsername || "Someone";
+    await ctx.scheduler.runAfter(0, internal.activity.logActivity, {
+      type: "project_created",
+      userId: userId,
+      relatedId: projectId,
+      message: `${userName} submitted a new project: "${args.title}"`,
     });
 
     return projectId;

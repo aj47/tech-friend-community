@@ -3,6 +3,7 @@
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import { ReactNode } from "react";
+import { CelebrationProvider } from "./CelebrationContext";
 
 // Use a fallback URL for build time - this will be replaced at runtime
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || "https://placeholder.convex.cloud";
@@ -13,7 +14,9 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
   // The default namespace is derived from the Convex URL automatically
   return (
     <ConvexAuthProvider client={convex}>
-      {children}
+      <CelebrationProvider>
+        {children}
+      </CelebrationProvider>
     </ConvexAuthProvider>
   );
 }

@@ -34,6 +34,10 @@ const schema = defineSchema({
         v.literal("architect")
       )
     ),
+    // Streak tracking fields
+    currentStreak: v.optional(v.number()),
+    longestStreak: v.optional(v.number()),
+    lastContributionDate: v.optional(v.string()),
     createdAt: v.optional(v.number()),
     // Legacy fields from old bounty platform (kept for backward compatibility)
     totalEarnings: v.optional(v.number()),
@@ -126,6 +130,33 @@ const schema = defineSchema({
     .index("by_user", ["userId"])
     .index("by_reward", ["rewardId"])
     .index("by_status", ["status"]),
+
+  // User Achievements table - tracks unlocked achievements
+  userAchievements: defineTable({
+    userId: v.id("users"),
+    achievementId: v.string(),  // e.g., "first_contribution", "ten_contributions"
+    unlockedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_achievement", ["achievementId"]),
+
+  // Activity feed table - tracks public activity for social proof
+  activityFeed: defineTable({
+    type: v.union(
+      v.literal("contribution_submitted"),
+      v.literal("contribution_verified"),
+      v.literal("project_created"),
+      v.literal("reward_redeemed"),
+      v.literal("tier_upgraded"),
+      v.literal("streak_milestone")
+    ),
+    userId: v.id("users"),
+    relatedId: v.optional(v.string()),  // project/contribution ID as string
+    message: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_created_at", ["createdAt"])
+    .index("by_user", ["userId"]),
 
   // Notifications table (kept and updated for new platform)
   notifications: defineTable({
