@@ -108,18 +108,20 @@ export default function EditProjectPage() {
   };
 
   const toggleIssue = (issue: typeof availableIssues[0]) => {
-    const isSelected = selectedIssues.some((i) => i.number === issue.number);
-    if (isSelected) {
-      setSelectedIssues(selectedIssues.filter((i) => i.number !== issue.number));
-    } else {
-      setSelectedIssues([...selectedIssues, {
-        number: issue.number,
-        title: issue.title,
-        url: issue.url,
-        state: issue.state,
-        labels: issue.labels,
-      }]);
-    }
+    setSelectedIssues((prev) => {
+      const isSelected = prev.some((i) => i.number === issue.number);
+      if (isSelected) {
+        return prev.filter((i) => i.number !== issue.number);
+      } else {
+        return [...prev, {
+          number: issue.number,
+          title: issue.title,
+          url: issue.url,
+          state: issue.state,
+          labels: issue.labels,
+        }];
+      }
+    });
   };
 
   const removeSelectedIssue = (issueNumber: number) => {
@@ -179,6 +181,22 @@ export default function EditProjectPage() {
 
   // Loading state
   if (!project) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A]">
+        <Navbar />
+        <div className="max-w-2xl mx-auto px-4 py-12">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-[#222222] rounded w-1/3" />
+            <div className="h-4 bg-[#222222] rounded w-2/3" />
+            <div className="h-40 bg-[#222222] rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state for currentUser
+  if (currentUser === undefined) {
     return (
       <div className="min-h-screen bg-[#0A0A0A]">
         <Navbar />

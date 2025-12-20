@@ -126,18 +126,20 @@ export default function SubmitProjectPage() {
   };
 
   const toggleIssue = (issue: typeof availableIssues[0]) => {
-    const isSelected = selectedIssues.some((i) => i.number === issue.number);
-    if (isSelected) {
-      setSelectedIssues(selectedIssues.filter((i) => i.number !== issue.number));
-    } else {
-      setSelectedIssues([...selectedIssues, {
-        number: issue.number,
-        title: issue.title,
-        url: issue.url,
-        state: issue.state,
-        labels: issue.labels,
-      }]);
-    }
+    setSelectedIssues((prev) => {
+      const isSelected = prev.some((i) => i.number === issue.number);
+      if (isSelected) {
+        return prev.filter((i) => i.number !== issue.number);
+      } else {
+        return [...prev, {
+          number: issue.number,
+          title: issue.title,
+          url: issue.url,
+          state: issue.state,
+          labels: issue.labels,
+        }];
+      }
+    });
   };
 
   const addTag = (tag: string) => {

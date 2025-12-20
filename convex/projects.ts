@@ -18,7 +18,7 @@ export const submitProject = mutation({
       number: v.number(),
       title: v.string(),
       url: v.string(),
-      state: v.string(),
+      state: v.union(v.literal("open"), v.literal("closed")),
       labels: v.array(v.string()),
     }))),
   },
@@ -26,6 +26,15 @@ export const submitProject = mutation({
     const userId = await auth.getUserId(ctx);
     if (!userId) {
       throw new Error("Not authenticated");
+    }
+
+    // Validate GitHub issue URLs
+    if (args.githubIssues) {
+      for (const issue of args.githubIssues) {
+        if (!issue.url.startsWith("https://github.com/")) {
+          throw new Error("Invalid GitHub issue URL: must start with https://github.com/");
+        }
+      }
     }
 
     const projectId = await ctx.db.insert("projects", {
@@ -223,7 +232,7 @@ export const updateProject = mutation({
       number: v.number(),
       title: v.string(),
       url: v.string(),
-      state: v.string(),
+      state: v.union(v.literal("open"), v.literal("closed")),
       labels: v.array(v.string()),
     }))),
   },
@@ -240,6 +249,15 @@ export const updateProject = mutation({
 
     if (project.ownerId !== userId) {
       throw new Error("Not authorized to update this project");
+    }
+
+    // Validate GitHub issue URLs
+    if (args.githubIssues) {
+      for (const issue of args.githubIssues) {
+        if (!issue.url.startsWith("https://github.com/")) {
+          throw new Error("Invalid GitHub issue URL: must start with https://github.com/");
+        }
+      }
     }
 
     const updates: Record<string, unknown> = { updatedAt: Date.now() };
@@ -407,7 +425,7 @@ export const getAllIssues = query({
     }
 
     // Apply limit
-    if (args.limit) {
+    if (args.limit !== undefined) {
       return allIssues.slice(0, args.limit);
     }
 

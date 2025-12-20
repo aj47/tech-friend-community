@@ -60,7 +60,7 @@ const schema = defineSchema({
       number: v.number(),
       title: v.string(),
       url: v.string(),
-      state: v.string(),
+      state: v.union(v.literal("open"), v.literal("closed")),
       labels: v.array(v.string()),
     }))),
     status: v.union(
