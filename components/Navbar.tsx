@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Bell, Hammer, Trophy, User, LogOut, Menu, X, Gift } from "lucide-react";
+import { Bell, Hammer, Trophy, User, LogOut, Menu, X, Gift, Bug } from "lucide-react";
 import { useState } from "react";
 import { PointsBadge } from "./PointsBadge";
 
@@ -34,6 +34,13 @@ export function Navbar() {
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-300 hover:text-[#00FF41]"
               >
                 Projects
+              </Link>
+              <Link
+                href="/issues"
+                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-300 hover:text-[#00FF41]"
+              >
+                <Bug className="h-4 w-4 mr-1" />
+                Issues
               </Link>
               <Link
                 href="/leaderboard"
@@ -137,6 +144,13 @@ export function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Projects
+            </Link>
+            <Link
+              href="/issues"
+              className="block px-4 py-2 text-base font-medium text-gray-300 hover:bg-[#111111]"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Browse Issues
             </Link>
             <Link
               href="/leaderboard"
