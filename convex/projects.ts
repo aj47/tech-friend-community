@@ -28,11 +28,14 @@ export const submitProject = mutation({
       throw new Error("Not authenticated");
     }
 
-    // Validate GitHub issue URLs
+    // Validate GitHub issue URLs - must belong to the submitted repository
     if (args.githubIssues) {
+      const expectedUrlPrefix = `https://github.com/${args.githubRepoOwner}/${args.githubRepoName}/issues/`;
       for (const issue of args.githubIssues) {
-        if (!issue.url.startsWith("https://github.com/")) {
-          throw new Error("Invalid GitHub issue URL: must start with https://github.com/");
+        if (!issue.url.startsWith(expectedUrlPrefix)) {
+          throw new Error(
+            `Invalid GitHub issue URL: issues must belong to ${args.githubRepoOwner}/${args.githubRepoName}`
+          );
         }
       }
     }
@@ -251,11 +254,14 @@ export const updateProject = mutation({
       throw new Error("Not authorized to update this project");
     }
 
-    // Validate GitHub issue URLs
+    // Validate GitHub issue URLs - must belong to the project's repository
     if (args.githubIssues) {
+      const expectedUrlPrefix = `https://github.com/${project.githubRepoOwner}/${project.githubRepoName}/issues/`;
       for (const issue of args.githubIssues) {
-        if (!issue.url.startsWith("https://github.com/")) {
-          throw new Error("Invalid GitHub issue URL: must start with https://github.com/");
+        if (!issue.url.startsWith(expectedUrlPrefix)) {
+          throw new Error(
+            `Invalid GitHub issue URL: issues must belong to ${project.githubRepoOwner}/${project.githubRepoName}`
+          );
         }
       }
     }

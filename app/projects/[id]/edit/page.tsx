@@ -179,8 +179,8 @@ export default function EditProjectPage() {
     }
   };
 
-  // Loading state
-  if (!project) {
+  // Loading state - project is undefined while loading
+  if (project === undefined) {
     return (
       <div className="min-h-screen bg-[#0A0A0A]">
         <Navbar />
@@ -190,6 +190,29 @@ export default function EditProjectPage() {
             <div className="h-4 bg-[#222222] rounded w-2/3" />
             <div className="h-40 bg-[#222222] rounded" />
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Not found state - project is null when it doesn't exist
+  if (project === null) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A]">
+        <Navbar />
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">
+            Project Not Found
+          </h1>
+          <p className="text-gray-400 mb-8">
+            The project you&apos;re looking for doesn&apos;t exist or has been removed.
+          </p>
+          <Link
+            href="/projects"
+            className="inline-flex items-center px-6 py-3 bg-[#00FF41] text-black font-medium rounded-lg hover:bg-[#00DD35]"
+          >
+            Browse Projects
+          </Link>
         </div>
       </div>
     );
