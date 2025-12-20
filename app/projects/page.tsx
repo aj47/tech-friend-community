@@ -1,14 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Navbar } from "@/components/Navbar";
 import { ProjectCard } from "@/components/ProjectCard";
-import { Search, Filter, Plus } from "lucide-react";
+import { Search, Filter, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function ProjectsPage() {
+  // Next.js requires `useSearchParams()` to be wrapped in a Suspense boundary.
+  return (
+    <Suspense fallback={<ProjectsPageLoading />}>
+      <ProjectsPageContent />
+    </Suspense>
+  );
+}
+
+function ProjectsPageLoading() {
+  return (
+    <div className="min-h-screen bg-[#0A0A0A]">
+      <Navbar />
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+        <Loader2 className="w-10 h-10 text-[#00FF41] animate-spin mx-auto mb-4" />
+        <p className="text-gray-400">Loading projects...</p>
+      </div>
+    </div>
+  );
+}
+
+function ProjectsPageContent() {
+  const searchParams = useSearchParams();
+  const ownerParam = searchParams?.get("owner");
+  const ownerMeView = ownerParam === "me";
+
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"active" | "paused" | "completed" | "all">("all");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -20,6 +46,40 @@ export default function ProjectsPage() {
 
   const allTags = useQuery(api.projects.getAllTags);
   const currentUser = useQuery(api.users.getCurrentUser);
+
+  if (ownerMeView && currentUser === undefined) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A]">
+        <Navbar />
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+          <Loader2 className="w-10 h-10 text-[#00FF41] animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading your projects...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (ownerMeView && currentUser === null) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A]">
+        <Navbar />
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">
+            Sign in to view your projects
+          </h1>
+          <p className="text-gray-400 mb-8">
+            Your projects list is tied to your GitHub account.
+          </p>
+          <Link
+            href="/auth/signin"
+            className="inline-flex items-center px-6 py-3 bg-[#00FF41] text-black font-medium rounded-lg hover:bg-[#00DD35]"
+          >
+            Sign in with GitHub
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   // Client-side search filter
   const filteredProjects = projects?.filter((project) => {
@@ -33,6 +93,10 @@ export default function ProjectsPage() {
     );
   });
 
+  const visibleProjects = ownerMeView && currentUser
+    ? filteredProjects?.filter((p) => String(p.ownerId) === String(currentUser._id))
+    : filteredProjects;
+
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
       <Navbar />
@@ -41,20 +105,23 @@ export default function ProjectsPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Projects</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              {ownerMeView ? "My Projects" : "Projects"}
+            </h1>
             <p className="text-gray-400">
-              Find projects that need your help and start contributing
+              {ownerMeView
+                ? "Manage your submitted projects and review contributions"
+                : "Find projects that need your help and start contributing"}
             </p>
           </div>
-          {currentUser && (
-            <Link
-              href="/projects/submit"
-              className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 bg-[#00FF41] text-black font-medium rounded-lg hover:bg-[#00DD35] transition-colors"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Submit Project
-            </Link>
-          )}
+          <Link
+            href={currentUser ? "/projects/submit" : "/auth/signin"}
+            className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 bg-[#00FF41] text-black font-medium rounded-lg hover:bg-[#00DD35] transition-colors"
+            title={currentUser ? "Submit a project" : "Sign in to submit a project"}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {currentUser ? "Submit Project" : "Sign in to submit"}
+          </Link>
         </div>
 
         {/* Filters */}
@@ -140,9 +207,9 @@ export default function ProjectsPage() {
               </div>
             ))}
           </div>
-        ) : filteredProjects && filteredProjects.length > 0 ? (
+        ) : visibleProjects && visibleProjects.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2">
-            {filteredProjects.map((project) => (
+            {visibleProjects.map((project) => (
               <ProjectCard key={project._id} project={project} />
             ))}
           </div>
@@ -151,15 +218,17 @@ export default function ProjectsPage() {
             <p className="text-gray-400 mb-4">
               {searchQuery || selectedTag
                 ? "No projects match your search"
+                : ownerMeView
+                ? "You haven't submitted any projects yet"
                 : "No projects available"}
             </p>
-            {currentUser && !searchQuery && !selectedTag && (
+            {!searchQuery && !selectedTag && (
               <Link
-                href="/projects/submit"
+                href={currentUser ? "/projects/submit" : "/auth/signin"}
                 className="inline-flex items-center px-4 py-2 bg-[#00FF41] text-black rounded-lg hover:bg-[#00DD35]"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Submit the first project
+                {currentUser ? "Submit your first project" : "Sign in to submit"}
               </Link>
             )}
           </div>

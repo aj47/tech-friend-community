@@ -13,6 +13,9 @@ import {
   ExternalLink,
   Plus,
   ArrowRight,
+  Loader2,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 
 const TYPE_ICONS = {
@@ -37,7 +40,47 @@ export default function ProfilePage() {
   const myContributions = useQuery(api.contributions.getMyContributions);
   const myRedemptions = useQuery(api.rewards.getMyRedemptions);
 
-  if (!currentUser) {
+  const quickstartSteps = userStats
+    ? [
+        {
+          key: "submit_project",
+          label: "Submit a project",
+          description: "Share your repo and what you need help with.",
+          done: userStats.stats.projectsSubmitted > 0,
+          href: "/projects/submit",
+        },
+        {
+          key: "make_contribution",
+          label: "Make your first contribution",
+          description: "Pick an issue or PR and submit your proof.",
+          done: userStats.stats.contributionsMade > 0,
+          href: "/projects",
+        },
+        {
+          key: "redeem_reward",
+          label: "Redeem a reward",
+          description: "Turn points into something tangible.",
+          done: userStats.stats.rewardsRedeemed > 0,
+          href: "/rewards",
+        },
+      ]
+    : [];
+
+  const nextStep = quickstartSteps.find((s) => !s.done);
+
+  if (currentUser === undefined) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A]">
+        <Navbar />
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+          <Loader2 className="w-10 h-10 text-[#00FF41] animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (currentUser === null) {
     return (
       <div className="min-h-screen bg-[#0A0A0A]">
         <Navbar />
@@ -141,6 +184,71 @@ export default function ProfilePage() {
                 {userStats.stats.rewardsRedeemed}
               </p>
               <p className="text-gray-500 text-sm">Rewards Claimed</p>
+            </div>
+          </div>
+        )}
+
+        {/* Quickstart / Next steps */}
+        {userStats && (
+          <div className="bg-[#111111] border border-[#222222] rounded-lg p-6 mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Quickstart</h2>
+                <p className="text-gray-400 text-sm mt-1">
+                  Follow the loop: contribute &rarr; earn points &rarr; redeem rewards.
+                </p>
+              </div>
+              {nextStep ? (
+                <Link
+                  href={nextStep.href}
+                  className="inline-flex items-center justify-center px-4 py-2 bg-[#00FF41] text-black font-medium rounded-lg hover:bg-[#00DD35]"
+                >
+                  {nextStep.label}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              ) : (
+                <Link
+                  href="/leaderboard"
+                  className="inline-flex items-center justify-center px-4 py-2 border border-[#333333] text-white rounded-lg hover:border-[#00FF41]"
+                >
+                  View leaderboard
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              )}
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {quickstartSteps.map((step) => {
+                const Icon = step.done ? CheckCircle2 : Circle;
+                return (
+                  <div
+                    key={step.key}
+                    className="flex items-start justify-between gap-4 p-4 rounded-lg bg-[#0A0A0A] border border-[#1a1a1a]"
+                  >
+                    <div className="flex items-start gap-3">
+                      <Icon
+                        className={`w-5 h-5 mt-0.5 ${
+                          step.done ? "text-[#00FF41]" : "text-gray-600"
+                        }`}
+                      />
+                      <div>
+                        <p className="text-white font-medium">{step.label}</p>
+                        <p className="text-gray-500 text-sm mt-1">
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
+                    {!step.done && (
+                      <Link
+                        href={step.href}
+                        className="text-sm text-[#00FF41] hover:underline whitespace-nowrap"
+                      >
+                        Do this
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -279,9 +387,17 @@ export default function ProfilePage() {
                           >
                             {contribution.status}
                           </span>
-                          <span className="text-[#00FF41] font-bold">
-                            +{contribution.pointsAwarded}
-                          </span>
+                          {contribution.status === "verified" ? (
+                            <span className="text-[#00FF41] font-bold">
+                              +{contribution.pointsAwarded}
+                            </span>
+                          ) : contribution.status === "pending" ? (
+                            <span className="text-gray-400 text-sm">
+                              +{contribution.pointsAwarded} if verified
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 text-sm">Not awarded</span>
+                          )}
                           <a
                             href={contribution.githubUrl}
                             target="_blank"

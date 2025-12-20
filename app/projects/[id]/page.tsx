@@ -21,6 +21,7 @@ import {
   Bug,
   Tag,
   Pencil,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -37,13 +38,20 @@ const TYPE_LABELS = {
 };
 
 export default function ProjectDetailPage() {
-  const params = useParams();
-  const projectId = params.id as Id<"projects">;
+  const params = useParams<{ id: string }>();
+  const projectId = params?.id ? (params.id as Id<"projects">) : null;
 
-  const project = useQuery(api.projects.getProject, { projectId });
+  const project = useQuery(
+    api.projects.getProject,
+    projectId ? { projectId } : "skip",
+  );
   const currentUser = useQuery(api.users.getCurrentUser);
 
   const [showContributionForm, setShowContributionForm] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [ownerActionError, setOwnerActionError] = useState<string | null>(null);
+  const [verifyingId, setVerifyingId] = useState<Id<"contributions"> | null>(null);
+  const [rejectingId, setRejectingId] = useState<Id<"contributions"> | null>(null);
 
   const verifyContribution = useMutation(api.contributions.verifyContribution);
   const rejectContribution = useMutation(api.contributions.rejectContribution);
@@ -51,20 +59,60 @@ export default function ProjectDetailPage() {
   const isOwner = currentUser && project?.owner?._id === currentUser._id;
 
   const handleVerify = async (contributionId: Id<"contributions">) => {
+    const confirmed = window.confirm(
+      "Verify this contribution? This will award points and notify the contributor."
+    );
+    if (!confirmed) return;
+
+    setOwnerActionError(null);
+    setVerifyingId(contributionId);
     try {
       await verifyContribution({ contributionId });
-    } catch (err) {
-      console.error("Failed to verify contribution:", err);
+    } catch (err: any) {
+      setOwnerActionError(err?.message || "Failed to verify contribution");
+    } finally {
+      setVerifyingId(null);
     }
   };
 
   const handleReject = async (contributionId: Id<"contributions">) => {
+    const confirmed = window.confirm(
+      "Reject this contribution? The contributor will be notified."
+    );
+    if (!confirmed) return;
+
+    setOwnerActionError(null);
+    setRejectingId(contributionId);
     try {
       await rejectContribution({ contributionId });
-    } catch (err) {
-      console.error("Failed to reject contribution:", err);
+    } catch (err: any) {
+      setOwnerActionError(err?.message || "Failed to reject contribution");
+    } finally {
+      setRejectingId(null);
     }
   };
+
+  if (!projectId) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A]">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-4 py-12">
+          <h1 className="text-2xl font-bold text-white">Missing project id</h1>
+          <p className="text-gray-400 mt-2">
+            This page needs a valid project URL.
+          </p>
+          <div className="mt-6">
+            <Link
+              href="/projects"
+              className="inline-flex items-center justify-center px-6 py-3 bg-[#00FF41] text-black font-medium rounded-lg hover:bg-[#00DD35]"
+            >
+              Back to Projects
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!project) {
     return (
@@ -81,12 +129,14 @@ export default function ProjectDetailPage() {
     );
   }
 
-  const pendingContributions = project.contributions?.filter(
-    (c) => c.status === "pending"
-  );
-  const verifiedContributions = project.contributions?.filter(
-    (c) => c.status === "verified"
-  );
+  const allContributions = project.contributions || [];
+  const pendingContributions = allContributions.filter((c) => c.status === "pending");
+  const verifiedContributions = allContributions.filter((c) => c.status === "verified");
+  const myContributions = currentUser
+    ? allContributions.filter(
+        (c) => String(c.contributorId) === String(currentUser._id)
+      )
+    : [];
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
@@ -177,7 +227,7 @@ export default function ProjectDetailPage() {
             </a>
             <div className="flex items-center text-gray-400">
               <Users className="w-4 h-4 mr-1" />
-              {project.contributions?.length || 0} contributions
+              {verifiedContributions.length} verified • {pendingContributions.length} pending
             </div>
           </div>
         </div>
@@ -241,6 +291,43 @@ export default function ProjectDetailPage() {
           </div>
         )}
 
+        {/* Contribution Submitted */}
+        {submitSuccess && currentUser && !isOwner && (
+          <div className="mb-6 bg-[#00FF41]/10 border border-[#00FF41]/25 rounded-lg p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[#00FF41] font-medium">Contribution submitted!</p>
+                <p className="text-gray-400 text-sm mt-1">
+                  It&apos;s now pending verification by the project owner. You&apos;ll get a
+                  notification when it&apos;s reviewed.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <Link
+                    href="/notifications"
+                    className="text-sm text-white underline hover:text-[#00FF41]"
+                  >
+                    View notifications
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className="text-sm text-white underline hover:text-[#00FF41]"
+                  >
+                    View your contributions
+                  </Link>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSubmitSuccess(false)}
+                className="text-gray-400 hover:text-white"
+                aria-label="Dismiss"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Submit Contribution Button */}
         {currentUser && !isOwner && project.status === "active" && (
           <div className="mb-8">
@@ -251,7 +338,10 @@ export default function ProjectDetailPage() {
                 </h2>
                 <ContributionForm
                   projectId={projectId}
-                  onSuccess={() => setShowContributionForm(false)}
+                  onSuccess={() => {
+                    setShowContributionForm(false);
+                    setSubmitSuccess(true);
+                  }}
                   onCancel={() => setShowContributionForm(false)}
                 />
               </div>
@@ -266,6 +356,70 @@ export default function ProjectDetailPage() {
           </div>
         )}
 
+        {/* My Submissions (Contributor View) */}
+        {currentUser && !isOwner && myContributions.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-white mb-4">
+              Your Submissions ({myContributions.length})
+            </h2>
+            <div className="space-y-3">
+              {myContributions.map((contribution) => {
+                const Icon = TYPE_ICONS[contribution.type];
+                return (
+                  <div
+                    key={contribution._id}
+                    className="bg-[#111111] border border-[#222222] rounded-lg p-4 flex items-center justify-between"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Icon className="w-4 h-4 text-gray-400" />
+                      <div>
+                        <p className="text-white font-medium">
+                          {TYPE_LABELS[contribution.type]}
+                        </p>
+                        <p className="text-gray-500 text-sm">
+                          Submitted {new Date(contribution.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span
+                        className={`px-2 py-1 text-xs rounded ${
+                          contribution.status === "verified"
+                            ? "bg-[#00FF41]/20 text-[#00FF41]"
+                            : contribution.status === "pending"
+                            ? "bg-yellow-500/20 text-yellow-500"
+                            : "bg-red-500/20 text-red-500"
+                        }`}
+                      >
+                        {contribution.status}
+                      </span>
+                      {contribution.status === "verified" ? (
+                        <span className="text-[#00FF41] font-bold">
+                          +{contribution.pointsAwarded} pts
+                        </span>
+                      ) : contribution.status === "pending" ? (
+                        <span className="text-gray-400 text-sm">
+                          +{contribution.pointsAwarded} pts if verified
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-sm">Not awarded</span>
+                      )}
+                      <a
+                        href={contribution.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-white"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Pending Contributions (Owner View) */}
         {isOwner && pendingContributions && pendingContributions.length > 0 && (
           <div className="mb-8">
@@ -273,6 +427,13 @@ export default function ProjectDetailPage() {
               <Clock className="w-5 h-5 mr-2 text-yellow-500" />
               Pending Verification ({pendingContributions.length})
             </h2>
+
+            {ownerActionError && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <p className="text-red-500 text-sm">{ownerActionError}</p>
+              </div>
+            )}
+
             <div className="space-y-4">
               {pendingContributions.map((contribution) => {
                 const Icon = TYPE_ICONS[contribution.type];
@@ -320,15 +481,27 @@ export default function ProjectDetailPage() {
                         </a>
                         <button
                           onClick={() => handleVerify(contribution._id)}
-                          className="p-2 bg-[#00FF41]/20 text-[#00FF41] rounded hover:bg-[#00FF41]/30"
+                          disabled={Boolean(verifyingId || rejectingId)}
+                          className="p-2 bg-[#00FF41]/20 text-[#00FF41] rounded hover:bg-[#00FF41]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Verify and award points"
                         >
-                          <Check className="w-4 h-4" />
+                          {verifyingId === contribution._id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Check className="w-4 h-4" />
+                          )}
                         </button>
                         <button
                           onClick={() => handleReject(contribution._id)}
-                          className="p-2 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30"
+                          disabled={Boolean(verifyingId || rejectingId)}
+                          className="p-2 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Reject contribution"
                         >
-                          <X className="w-4 h-4" />
+                          {rejectingId === contribution._id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <X className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
                     </div>

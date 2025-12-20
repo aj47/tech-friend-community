@@ -31,11 +31,14 @@ const SUGGESTED_TAGS = [
 ];
 
 export default function EditProjectPage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const router = useRouter();
-  const projectId = params.id as Id<"projects">;
+  const projectId = params?.id ? (params.id as Id<"projects">) : null;
 
-  const project = useQuery(api.projects.getProject, { projectId });
+  const project = useQuery(
+    api.projects.getProject,
+    projectId ? { projectId } : "skip",
+  );
   const currentUser = useQuery(api.users.getCurrentUser);
   const updateProject = useMutation(api.projects.updateProject);
   const fetchRepoIssues = useAction(api.github.fetchRepoIssues);
@@ -55,7 +58,7 @@ export default function EditProjectPage() {
     number: number;
     title: string;
     url: string;
-    state: string;
+    state: "open" | "closed";
     labels: string[];
     body: string;
     createdAt: string;
@@ -64,12 +67,34 @@ export default function EditProjectPage() {
     number: number;
     title: string;
     url: string;
-    state: string;
+    state: "open" | "closed";
     labels: string[];
   }>>([]);
   const [isFetchingIssues, setIsFetchingIssues] = useState(false);
   const [issuesFetchError, setIssuesFetchError] = useState<string | null>(null);
   const [hasInitialized, setHasInitialized] = useState(false);
+
+  if (!projectId) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] text-white">
+        <Navbar />
+        <div className="max-w-2xl mx-auto px-4 py-12">
+          <h1 className="text-2xl font-bold">Missing project id</h1>
+          <p className="text-gray-400 mt-2">
+            This page needs a valid project URL.
+          </p>
+          <div className="mt-6">
+            <Link
+              href="/projects"
+              className="inline-flex items-center px-6 py-3 bg-[#00FF41] text-black font-medium rounded-lg hover:bg-[#00DD35]"
+            >
+              Back to Projects
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Initialize form with project data
   useEffect(() => {

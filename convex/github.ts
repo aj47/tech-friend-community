@@ -86,7 +86,7 @@ export const fetchUserRepositories = action({
         per_page: 100,
       });
 
-      return data.map((repo) => ({
+      return data.map((repo: any) => ({
         id: repo.id,
         name: repo.name,
         fullName: repo.full_name,
@@ -243,15 +243,15 @@ export const fetchRepoIssues = action({
       });
 
       // Filter out pull requests (they also show up in the issues endpoint)
-      const issues = data.filter((issue) => !issue.pull_request);
+      const issues = data.filter((issue: any) => !issue.pull_request);
 
-      return issues.map((issue) => ({
+      return issues.map((issue: any) => ({
         number: issue.number,
         title: issue.title,
         url: issue.html_url,
         state: issue.state,
         labels: issue.labels
-          .map((label) => (typeof label === "string" ? label : label.name || ""))
+          .map((label: any) => (typeof label === "string" ? label : label.name || ""))
           .filter(Boolean),
         body: issue.body?.slice(0, 200) || "",
         createdAt: issue.created_at,
