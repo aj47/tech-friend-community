@@ -61,12 +61,17 @@ export default function SubmitProjectPage() {
     labels: string[];
   }>>([]);
   const [isFetchingIssues, setIsFetchingIssues] = useState(false);
+  const [issuesFetchError, setIssuesFetchError] = useState<string | null>(null);
 
   const handleFetchRepo = async () => {
     if (!repoUrl.trim() || !currentUser?.githubAccessToken) return;
 
     setIsFetchingRepo(true);
     setError(null);
+    // Clear previous issue selections and available issues when fetching a new repo
+    setSelectedIssues([]);
+    setAvailableIssues([]);
+    setIssuesFetchError(null);
 
     try {
       const info = await fetchRepoFromUrl({
@@ -103,6 +108,7 @@ export default function SubmitProjectPage() {
     if (!issueOwner || !issueRepo || !currentUser?.githubAccessToken) return;
 
     setIsFetchingIssues(true);
+    setIssuesFetchError(null);
     try {
       const issues = await fetchRepoIssues({
         accessToken: currentUser.githubAccessToken,
@@ -112,6 +118,8 @@ export default function SubmitProjectPage() {
       setAvailableIssues(issues);
     } catch (err: any) {
       console.error("Failed to fetch issues:", err);
+      setAvailableIssues([]);
+      setIssuesFetchError(err.message || "Failed to fetch issues from GitHub");
     } finally {
       setIsFetchingIssues(false);
     }
@@ -345,6 +353,17 @@ export default function SubmitProjectPage() {
                       </button>
                     );
                   })}
+                </div>
+              ) : issuesFetchError ? (
+                <div className="py-4 text-center bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <p className="text-red-500 text-sm">{issuesFetchError}</p>
+                  <button
+                    type="button"
+                    onClick={() => handleFetchIssues()}
+                    className="mt-2 text-sm text-[#00FF41] hover:text-[#00DD35]"
+                  >
+                    Try again
+                  </button>
                 </div>
               ) : (
                 <div className="py-4 text-center bg-[#111111] border border-[#333333] rounded-lg">
