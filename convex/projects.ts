@@ -14,6 +14,13 @@ export const submitProject = mutation({
     description: v.string(),
     helpWanted: v.string(),
     tags: v.array(v.string()),
+    githubIssues: v.optional(v.array(v.object({
+      number: v.number(),
+      title: v.string(),
+      url: v.string(),
+      state: v.string(),
+      labels: v.array(v.string()),
+    }))),
   },
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
@@ -30,6 +37,7 @@ export const submitProject = mutation({
       description: args.description,
       helpWanted: args.helpWanted,
       tags: args.tags,
+      githubIssues: args.githubIssues || [],
       status: "active",
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -211,6 +219,13 @@ export const updateProject = mutation({
     status: v.optional(
       v.union(v.literal("active"), v.literal("paused"), v.literal("completed"))
     ),
+    githubIssues: v.optional(v.array(v.object({
+      number: v.number(),
+      title: v.string(),
+      url: v.string(),
+      state: v.string(),
+      labels: v.array(v.string()),
+    }))),
   },
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
@@ -233,6 +248,7 @@ export const updateProject = mutation({
     if (args.helpWanted !== undefined) updates.helpWanted = args.helpWanted;
     if (args.tags !== undefined) updates.tags = args.tags;
     if (args.status !== undefined) updates.status = args.status;
+    if (args.githubIssues !== undefined) updates.githubIssues = args.githubIssues;
 
     await ctx.db.patch(args.projectId, updates);
     return args.projectId;
@@ -317,5 +333,84 @@ export const getAllTags = query({
     const projects = await ctx.db.query("projects").collect();
     const allTags = projects.flatMap((p) => p.tags);
     return [...new Set(allTags)].sort();
+  },
+});
+
+/**
+ * Get all open issues from active projects
+ */
+export const getAllIssues = query({
+  args: {
+    tag: v.optional(v.string()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const projects = await ctx.db
+      .query("projects")
+      .withIndex("by_status", (q) => q.eq("status", "active"))
+      .collect();
+
+    // Filter by tag if provided
+    let filteredProjects = projects;
+    if (args.tag) {
+      filteredProjects = projects.filter((p) => p.tags.includes(args.tag!));
+    }
+
+    // Collect all issues from all projects
+    const allIssues: Array<{
+      projectId: typeof projects[0]["_id"];
+      projectTitle: string;
+      githubRepoUrl: string;
+      githubRepoOwner: string;
+      githubRepoName: string;
+      issue: {
+        number: number;
+        title: string;
+        url: string;
+        state: string;
+        labels: string[];
+      };
+      owner: {
+        _id: typeof projects[0]["ownerId"];
+        name?: string | null;
+        githubUsername?: string | null;
+        image?: string | null;
+      } | null;
+      tags: string[];
+    }> = [];
+
+    for (const project of filteredProjects) {
+      const owner = await ctx.db.get(project.ownerId);
+      const issues = project.githubIssues || [];
+
+      for (const issue of issues) {
+        if (issue.state === "open") {
+          allIssues.push({
+            projectId: project._id,
+            projectTitle: project.title,
+            githubRepoUrl: project.githubRepoUrl,
+            githubRepoOwner: project.githubRepoOwner,
+            githubRepoName: project.githubRepoName,
+            issue,
+            owner: owner
+              ? {
+                  _id: owner._id,
+                  name: owner.name,
+                  githubUsername: owner.githubUsername,
+                  image: owner.image,
+                }
+              : null,
+            tags: project.tags,
+          });
+        }
+      }
+    }
+
+    // Apply limit
+    if (args.limit) {
+      return allIssues.slice(0, args.limit);
+    }
+
+    return allIssues;
   },
 });
