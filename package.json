@@ -2,15 +2,14 @@
   "name": "tech-friend-community",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@9.0.0",
   "scripts": {
-    "dev": "npx convex dev & next dev --turbopack",
+    "dev": "convex dev & next dev --turbopack",
     "dev:next": "next dev --turbopack",
-    "dev:convex": "npx convex dev",
+    "dev:convex": "convex dev",
     "build": "next build",
-    "build:cloudflare": "next build && open-next build --minify",
     "start": "next start",
-    "lint": "eslint",
-    "deploy:cloudflare": "npm run build:cloudflare && wrangler pages deploy .open-next/worker --project-name agent-battler"
+    "lint": "eslint"
   },
   "dependencies": {
     "@auth/core": "^0.37.4",
@@ -36,7 +35,6 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "wrangler": "^4.40.2"
+    "typescript": "^5"
   }
 }

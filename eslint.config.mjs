@@ -10,16 +10,20 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // Global ignores (apply before any inherited Next configs)
   {
     ignores: [
       "node_modules/**",
       ".next/**",
+	    ".open-next/**",
       "out/**",
       "build/**",
       "next-env.d.ts",
       "convex/_generated/**",
     ],
+  },
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
     rules: {
       // Keep hooks strict to avoid runtime bugs
       "react-hooks/rules-of-hooks": "error",

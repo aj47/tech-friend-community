@@ -18,12 +18,12 @@ export default function SignInPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center">
             <Hammer className="h-12 w-12 text-[#00FF41]" />
-            <span className="ml-2 text-3xl font-bold text-white">
-              Builders
+            <span className="ml-2 text-2xl sm:text-3xl font-bold text-white">
+              Tech Friend Community
             </span>
           </Link>
           <p className="mt-4 text-gray-400">
-            Sign in to submit projects and start contributing
+            Sign in to accelerate open source by building together
           </p>
         </div>
 

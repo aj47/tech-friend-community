@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
-// Define the schema for the Builder Community Platform
+// Define the schema for the Tech Friend Community platform
 const schema = defineSchema({
   // Include auth tables from Convex Auth
   ...authTables,
@@ -23,7 +23,7 @@ const schema = defineSchema({
     login: v.optional(v.string()),
     avatar_url: v.optional(v.string()),
     githubAccessToken: v.optional(v.string()),
-    // Builder Community fields
+    // Tech Friend Community fields
     totalPoints: v.optional(v.number()),
     discordId: v.optional(v.string()),
     tier: v.optional(

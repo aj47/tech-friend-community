@@ -57,7 +57,7 @@ export default function SubmitProjectPage() {
     number: number;
     title: string;
     url: string;
-    state: string;
+    state: "open" | "closed";
     labels: string[];
   }>>([]);
   const [isFetchingIssues, setIsFetchingIssues] = useState(false);
@@ -135,7 +135,7 @@ export default function SubmitProjectPage() {
           number: issue.number,
           title: issue.title,
           url: issue.url,
-          state: issue.state,
+          state: issue.state === "closed" ? "closed" : "open",
           labels: issue.labels,
         }];
       }

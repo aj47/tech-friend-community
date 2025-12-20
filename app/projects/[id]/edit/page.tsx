@@ -64,7 +64,7 @@ export default function EditProjectPage() {
     number: number;
     title: string;
     url: string;
-    state: string;
+    state: "open" | "closed";
     labels: string[];
   }>>([]);
   const [isFetchingIssues, setIsFetchingIssues] = useState(false);
@@ -79,7 +79,10 @@ export default function EditProjectPage() {
       setHelpWanted(project.helpWanted);
       setTags(project.tags);
       setStatus(project.status);
-      setSelectedIssues(project.githubIssues || []);
+      setSelectedIssues((project.githubIssues || []).map(issue => ({
+        ...issue,
+        state: issue.state as "open" | "closed",
+      })));
       setHasInitialized(true);
     }
   }, [project, hasInitialized]);
@@ -117,7 +120,7 @@ export default function EditProjectPage() {
           number: issue.number,
           title: issue.title,
           url: issue.url,
-          state: issue.state,
+          state: issue.state === "closed" ? "closed" : "open",
           labels: issue.labels,
         }];
       }
