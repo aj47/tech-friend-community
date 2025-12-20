@@ -20,6 +20,7 @@ import {
   MessageSquare,
   Bug,
   Tag,
+  Pencil,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -126,17 +127,28 @@ export default function ProjectDetailPage() {
                 </p>
               </div>
             </div>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                project.status === "active"
-                  ? "bg-[#00FF41]/20 text-[#00FF41]"
-                  : project.status === "paused"
-                  ? "bg-yellow-500/20 text-yellow-500"
-                  : "bg-gray-500/20 text-gray-500"
-              }`}
-            >
-              {project.status}
-            </span>
+            <div className="flex items-center gap-3">
+              {isOwner && (
+                <Link
+                  href={`/projects/${projectId}/edit`}
+                  className="inline-flex items-center px-3 py-1.5 bg-[#222222] text-gray-300 rounded-lg hover:bg-[#333333] hover:text-white transition-colors text-sm"
+                >
+                  <Pencil className="w-4 h-4 mr-1.5" />
+                  Edit
+                </Link>
+              )}
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  project.status === "active"
+                    ? "bg-[#00FF41]/20 text-[#00FF41]"
+                    : project.status === "paused"
+                    ? "bg-yellow-500/20 text-yellow-500"
+                    : "bg-gray-500/20 text-gray-500"
+                }`}
+              >
+                {project.status}
+              </span>
+            </div>
           </div>
 
           <p className="text-gray-300 mb-4">{project.description}</p>
